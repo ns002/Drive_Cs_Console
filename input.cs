@@ -1,44 +1,51 @@
 ﻿using System.Runtime.InteropServices;
-
-namespace Game
+public partial class Input     //Input class is partial because of partial GetAsyncKeyState() member
 {
-    public partial class Game
+    [LibraryImport("user32.dll")]
+    private static partial short GetAsyncKeyState(int vKey);    //External source from user32.dll
+
+    private enum Key : int {
+        ESCAPE = 0x1B,
+        LEFT = 0x25, UP = 0x26, RIGHT = 0x27, DOWN = 0x28,
+        A = 0x41, D = 0x44, W = 0x57, S = 0x53
+    }
+
+    private enum Movement : short { 
+        FORWARD  =  1, RIGHT = FORWARD,
+        BACKWARD = -1, LEFT  = BACKWARD,
+        NONE = 0
+    }
+
+    private static bool listening = false;
+    // An instance method that can freely read/write to the class instance fields
+    public static void StartInputListener()
     {
-        [LibraryImport("user32.dll")]
-        private static partial short GetAsyncKeyState(int vKey);
-
-        const int VK_LEFT = 0x25; const int VK_RIGHT = 0x27; const int VK_A = 0x41; const int VK_D = 0x44;
-        const int VK_UP = 0x26; const int VK_DOWN = 0x28; const int VK_W = 0x57; const int VK_S = 0x53;
-        const int VK_ESCAPE = 0x1B;
-
-        // An instance method that can freely read/write to the class instance fields
-        private void StartInputListener()
-        {
-            _ = Task.Run(() =>
-            {
+        if (!listening) {
+            listening = true; _ = Task.Run(() => {
                 bool leftPressed, rightPressed, upPressed, downPressed;
-                while (restart)
-                {
+                while (Game.running) {
                     //If the key is pressed GetAsyncKeyState(k) will return a negative number
-                    leftPressed = GetAsyncKeyState(VK_LEFT) < 0 || GetAsyncKeyState(VK_A) < 0;
-                    rightPressed = GetAsyncKeyState(VK_RIGHT) < 0 || GetAsyncKeyState(VK_D) < 0;
-                    upPressed = GetAsyncKeyState(VK_UP) < 0 || GetAsyncKeyState(VK_W) < 0;
-                    downPressed = GetAsyncKeyState(VK_DOWN) < 0 || GetAsyncKeyState(VK_S) < 0;
+                    leftPressed = GetAsyncKeyState((int)Key.LEFT) < 0 || GetAsyncKeyState((int)Key.A) < 0;
+                    rightPressed = GetAsyncKeyState((int)Key.RIGHT) < 0 || GetAsyncKeyState((int)Key.D) < 0;
+                    upPressed = GetAsyncKeyState((int)Key.UP) < 0 || GetAsyncKeyState((int)Key.W) < 0;
+                    downPressed = GetAsyncKeyState((int)Key.DOWN) < 0 || GetAsyncKeyState((int)Key.S) < 0;
 
-                    if (GetAsyncKeyState(VK_ESCAPE) < 0) Interlocked.Exchange(ref restart, false);
-
+                    if (GetAsyncKeyState((int)Key.ESCAPE) < 0)
+                    {
+                        Interlocked.Exchange(ref Game.running, false);
+                        listening = false; Console.WriteLine("Input Listener Destroyed");
+                    }
                     if (leftPressed && !rightPressed)
-                         Interlocked.Exchange(ref steerDirection, -1);
+                        Interlocked.Exchange(ref Game.steerDirection, (short)Movement.LEFT);
                     else if (rightPressed && !leftPressed)
-                         Interlocked.Exchange(ref steerDirection, 1);
-                    else Interlocked.Exchange(ref steerDirection, 0);
+                        Interlocked.Exchange(ref Game.steerDirection, (short)Movement.RIGHT);
+                    else Interlocked.Exchange(ref Game.steerDirection, (short)Movement.NONE);
 
                     if (upPressed && !downPressed)
-                         Interlocked.Exchange(ref speedDirection, 1);
+                        Interlocked.Exchange(ref Game.speedDirection, (short)Movement.FORWARD);
                     else if (downPressed && !upPressed)
-                         Interlocked.Exchange(ref speedDirection, -1);
-                    else 
-                        Interlocked.Exchange(ref speedDirection, 0);
+                        Interlocked.Exchange(ref Game.speedDirection, (short)Movement.BACKWARD);
+                    else Interlocked.Exchange(ref Game.speedDirection, (short)Movement.NONE);
 
                     while (Console.KeyAvailable) Console.ReadKey(true);
                 }
