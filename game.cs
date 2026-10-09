@@ -4,59 +4,65 @@ public class Game
 {
     public class PlayField()
     {
-        private readonly static string Reset = "\e[0m";
-        private readonly static string Zwart = "\e[30m";
-        private readonly static string Rood = "\e[31m";
-        private readonly static string Groen = "\e[32m";
-        private readonly static string Geel = "\e[33m";
-        private readonly static string Blauw = "\e[34m";
-        private readonly static string Magenta = "\e[35m";
-        private readonly static string Cyaan = "\e[36m";
-        private readonly static string Wit = "\e[37m";
-        private readonly static string FelZwart = "\e[90m";
-        private readonly static string FelRood = "\e[91m";
-        private readonly static string FelGroen = "\e[92m";
-        private readonly static string FelGeel = "\e[93m";
-        private readonly static string FelBlauw = "\e[94m";
-        private readonly static string FelMagenta = "\e[95m";
-        private readonly static string FelCyaan = "\e[96m";
-        private readonly static string FelWit = "\e[97m";
+        readonly static string COLOR_RESET = "\e[0m";
+        //readonly static string Zwart = "\e[30m";
+        readonly static string COLOR_RED = "\e[31m";
+        readonly static string COLOR_GREEN = "\e[32m";
+        readonly static string COLOR_YELLOW = "\e[33m";
+        //readonly static string Blauw = "\e[34m";
+        readonly static string COLOR_MAGENTA = "\e[35m";
+        //readonly static string Cyaan = "\e[36m";
+        readonly static string COLOR_WHITE = "\e[37m";
+        /*readonly static string FelZwart = "\e[90m";
+        readonly static string FelRood = "\e[91m";
+        readonly static string FelGroen = "\e[92m";
+        readonly static string FelGeel = "\e[93m";
+        readonly static string FelBlauw = "\e[94m";
+        readonly static string FelMagenta = "\e[95m";
+        readonly static string FelCyaan = "\e[96m";
+        readonly static string FelWit = "\e[97m";*/
 
+        short GetRandomDirection() => (short)randomNumberGenerator.Next(-1, 2); //get's the random direction the road will move to
         const ushort roadWidth = 12;
-        public readonly string[] roadSideChar = [$"{Wit}▒{Reset}", $"{Rood}▓{Reset}"];
-        private static Random randomNumberGenerator = new Random();
-        private short GetRandomDirection() => (short)randomNumberGenerator.Next(-1, 2); //get's the random direction the road will move to
-        private bool roadSidePicker = true;
-        private ushort PickRoadSideIndex() => (roadSidePicker = !roadSidePicker) ? (ushort)0 : (ushort)1;
+        const char roadsideChar = '▓';
+        bool roadSideColorDecider = true;
+        private string GetRoadsideColored()
+        { 
+            return roadSideColorDecider ?
+            $"{COLOR_WHITE + roadsideChar}" :
+            $"{COLOR_RED   + roadsideChar}";
+        }
         public const char roadChar = ' ';
         public const char carChar = '▲';
         public const char grassChar = '░';
         public const char coinChar = '*';
-        private const ushort minRoadStartPoint = 1;
-        private const ushort maxRoadStartPoint = windowWidth - roadWidth - 3;
+        const ushort minRoadSP = 1;
+        const ushort maxRoadSP = windowWidth - roadWidth - 3;
+
+        static Random randomNumberGenerator = new Random();
 
         public string CreateField()
         {
-            short roadStartingPoint = (short)randomNumberGenerator.Next(minRoadStartPoint, maxRoadStartPoint);
+            short roadStartingPoint = (short)randomNumberGenerator.Next(minRoadSP, maxRoadSP);
             StringBuilder field = new();
-            field.Append($"{Groen}").Append(grassChar, roadStartingPoint);
-            field.Append(roadSideChar[PickRoadSideIndex()]);
-            field.Append(roadChar, roadWidth);
-            field.Append(roadSideChar[PickRoadSideIndex()]);
-            field.Append($"{Groen}").Append(grassChar, windowWidth - roadStartingPoint + 14);
-            field.Append($"{Reset}0").Append('\n');
+            field.Append($"{COLOR_GREEN}").Append(grassChar, roadStartingPoint);                    //grass left
+            field.Append(GetRoadsideColored());                                                     //roadside left
+            field.Append(roadChar, roadWidth);                                                      //road
+            field.Append(GetRoadsideColored());                                                     //roadside right
+            field.Append($"{COLOR_GREEN}").Append(grassChar, windowWidth - roadStartingPoint + 14); //grass right
+            field.Append($"{COLOR_RESET}0\n");                                                      //debug & endline
             for (int i = 1; i < windowHeight; ++i)
             {
-                roadSidePicker = !roadSidePicker;
+                roadSideColorDecider = !roadSideColorDecider;   //switch Red & White roadside
                 short direction = GetRandomDirection();
-                if (direction < 0) if (roadStartingPoint > minRoadStartPoint) roadStartingPoint += direction;
-                if (direction > 0) if (roadStartingPoint < maxRoadStartPoint) roadStartingPoint += direction;
-                field.Append($"{Groen}").Append(grassChar, roadStartingPoint);
-                field.Append(roadSideChar[PickRoadSideIndex()]);
+                if (direction < 0) if (roadStartingPoint > minRoadSP) roadStartingPoint += direction;
+                if (direction > 0) if (roadStartingPoint < maxRoadSP) roadStartingPoint += direction;
+                field.Append($"{COLOR_GREEN}").Append(grassChar, roadStartingPoint);
+                field.Append(GetRoadsideColored());
                 field.Append(roadChar, roadWidth);
-                field.Append(roadSideChar[PickRoadSideIndex()]);
-                field.Append($"{Groen}").Append(grassChar, windowWidth - roadStartingPoint + 14);
-                field.Append($"{Reset}{i}").Append('\n');
+                field.Append(GetRoadsideColored());
+                field.Append($"{COLOR_GREEN}").Append(grassChar, windowWidth - roadStartingPoint + 14);
+                field.Append($"{COLOR_RESET}{i}").Append('\n');
             }
             return field.ToString();
         }
@@ -80,7 +86,7 @@ public class Game
     volatile public static short speedDirection = 0;
     volatile public static bool running = true;
     
-    public static void Main(string[] args)
+    public static void Main()
     {
         Game game = new Game();
         game.Run();

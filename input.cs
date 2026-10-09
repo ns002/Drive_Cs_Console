@@ -35,6 +35,7 @@ public partial class Input     //Input class is partial because of partial GetAs
                         Interlocked.Exchange(ref Game.running, false);
                         listening = false; Console.WriteLine("Input Listener Destroyed");
                     }
+
                     if (leftPressed && !rightPressed)
                         Interlocked.Exchange(ref Game.steerDirection, (short)Movement.LEFT);
                     else if (rightPressed && !leftPressed)
@@ -47,6 +48,13 @@ public partial class Input     //Input class is partial because of partial GetAs
                         Interlocked.Exchange(ref Game.speedDirection, (short)Movement.BACKWARD);
                     else Interlocked.Exchange(ref Game.speedDirection, (short)Movement.NONE);
 
+                    /* When the player presses keys (such as W, A, S, D, or arrow keys)
+                     * Windows remembers those keystrokes in a queue (the input buffer).
+                     * Windows expects the program to eventually type those letters on the screen.
+                     * Because the game takes care of the controls via the Windows API,
+                     * those letters are never read from the input buffer.
+                     * As soon as your game stops, dozens of wwwwaaaaasdddd letters suddenly flood into your command prompt or terminal.
+                     */
                     while (Console.KeyAvailable) Console.ReadKey(true);
                 }
             });
