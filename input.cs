@@ -10,9 +10,9 @@ public partial class Input     //Input class is partial because of partial GetAs
         A = 0x41, D = 0x44, W = 0x57, S = 0x53
     }
 
-    private enum Movement : short { 
-        FORWARD  =  1, RIGHT = FORWARD,
-        BACKWARD = -1, LEFT  = BACKWARD,
+    public enum Movement : short { 
+        FASTER  =  1, RIGHT = FASTER,
+        SLOWER = -1, LEFT  = SLOWER,
         NONE = 0
     }
 
@@ -37,16 +37,16 @@ public partial class Input     //Input class is partial because of partial GetAs
                     }
 
                     if (leftPressed && !rightPressed)
-                        Interlocked.Exchange(ref Game.steerDirection, (short)Movement.LEFT);
-                    else if (rightPressed && !leftPressed)
-                        Interlocked.Exchange(ref Game.steerDirection, (short)Movement.RIGHT);
-                    else Interlocked.Exchange(ref Game.steerDirection, (short)Movement.NONE);
+                        Interlocked.Exchange(ref Game.steerDirection, Movement.LEFT);
+                    else if (rightPressed && !leftPressed)            
+                        Interlocked.Exchange(ref Game.steerDirection, Movement.RIGHT);
+                    else Interlocked.Exchange(ref Game.steerDirection, Movement.NONE);
 
                     if (upPressed && !downPressed)
-                        Interlocked.Exchange(ref Game.speedDirection, (short)Movement.FORWARD);
+                        Interlocked.Exchange(ref Game.speedDirection, Movement.FASTER);
                     else if (downPressed && !upPressed)
-                        Interlocked.Exchange(ref Game.speedDirection, (short)Movement.BACKWARD);
-                    else Interlocked.Exchange(ref Game.speedDirection, (short)Movement.NONE);
+                        Interlocked.Exchange(ref Game.speedDirection, Movement.SLOWER);
+                    else Interlocked.Exchange(ref Game.speedDirection, Movement.NONE);
 
                     /* When the player presses keys (such as W, A, S, D, or arrow keys)
                      * Windows remembers those keystrokes in a queue (the input buffer).
@@ -54,8 +54,7 @@ public partial class Input     //Input class is partial because of partial GetAs
                      * Because the game takes care of the controls via the Windows API,
                      * those letters are never read from the input buffer.
                      * As soon as your game stops, dozens of wwwwaaaaasdddd letters suddenly flood into your command prompt or terminal.
-                     */
-                    while (Console.KeyAvailable) Console.ReadKey(true);
+                     */ while (Console.KeyAvailable) Console.ReadKey(true);
                 }
             });
         }
