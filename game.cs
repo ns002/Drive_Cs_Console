@@ -1,23 +1,18 @@
 ﻿using System.Text;
+public static class GlobalEvent
+{
+    public static ulong distance = 0;
+    public static bool playerDies = false;
+
+}
+
 public class Game
 {
-    public class Player()
-    {
-        //public short xPosition = 25;
-        public const ushort maxVelocity = 10;
-        public const ushort minVelocity = 1;
-        public ushort velocity = minVelocity;
-
-    }
-
     readonly Player player = new();
     readonly PlayField field = new();
 
-    ulong distance = 0;
     public const ushort windowHeight = 30;
     public const ushort windowWidth = 50;
-    volatile public static Input.Movement steerDirection = Input.Movement.NONE;
-    volatile public static Input.Movement speedDirection = Input.Movement.NONE;
     volatile public static bool running = true;
 
     public static void Main()
@@ -33,18 +28,22 @@ public class Game
         Console.OutputEncoding = Encoding.UTF8;
         Input.StartInputListener(); //start the background input listener
 
-        do
-        {
-            //if (player.xPosition > 1 && steerDirection == Input.Movement.LEFT) --player.xPosition;
-            //else if (player.xPosition < windowWidth - 1 && steerDirection == Input.Movement.RIGHT) ++player.xPosition;
-            if (player.velocity > Player.minVelocity && speedDirection == Input.Movement.SLOWER) --player.velocity;
-            else if (player.velocity < Player.maxVelocity && speedDirection == Input.Movement.FASTER) ++player.velocity;
+        do {/* The order of operations is very important
+             * First The playfield is updated so the lines in memory look as they will be rendered
+             * Then other gameobjects will update
+             * Then the field has to do a late update... in order to account for these objects in the scene
+             */
 
             field.Update();
+            
+            player.Update();
+
+            field.LateUpdate(ref player.position);
+
             field.Render();
 
             Thread.Sleep(150 - player.velocity * 10);
-            ++distance;
+            
 
             //tested the car
             /*StringBuilder road = new();

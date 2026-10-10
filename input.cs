@@ -37,16 +37,16 @@ public partial class Input     //Input class is partial because of partial GetAs
                     }
 
                     if (leftPressed && !rightPressed)
-                        Interlocked.Exchange(ref Game.steerDirection, Movement.LEFT);
+                        Interlocked.Exchange(ref Player.steerDirection, Movement.LEFT);
                     else if (rightPressed && !leftPressed)            
-                        Interlocked.Exchange(ref Game.steerDirection, Movement.RIGHT);
-                    else Interlocked.Exchange(ref Game.steerDirection, Movement.NONE);
+                        Interlocked.Exchange(ref Player.steerDirection, Movement.RIGHT);
+                    else Interlocked.Exchange(ref Player.steerDirection, Movement.NONE);
 
                     if (upPressed && !downPressed)
-                        Interlocked.Exchange(ref Game.speedDirection, Movement.FASTER);
+                        Interlocked.Exchange(ref Player.speedDirection, Movement.FASTER);
                     else if (downPressed && !upPressed)
-                        Interlocked.Exchange(ref Game.speedDirection, Movement.SLOWER);
-                    else Interlocked.Exchange(ref Game.speedDirection, Movement.NONE);
+                        Interlocked.Exchange(ref Player.speedDirection, Movement.SLOWER);
+                    else Interlocked.Exchange(ref Player.speedDirection, Movement.NONE);
 
                     /* When the player presses keys (such as W, A, S, D, or arrow keys)
                      * Windows remembers those keystrokes in a queue (the input buffer).
