@@ -49,10 +49,10 @@ public class PlayField()
         CreateLine(lines[0]);   //the newly generated line will always be at the top of the stack
     }
 
-    static bool spawning = true;
-    const short roadCenter = (roadWidth - 1) / 2;
-    static ushort centeredSpawnLocationCounter = 0;
+    const short halfRoadWidth = roadWidth / 2;
     static ushort visibleSpotCounter;
+    static bool findingSuitableSpawnpoint = true;
+    static ushort roadCenter = 0;
     public void LateUpdate(ref ushort playerPosition)
     {
         //place coins in line[0]
@@ -69,24 +69,22 @@ public class PlayField()
                     goto CriteriaMatches;
 
                 CriteriaMatches:   //label: when the string contains a visibile char
-                    if (spawning && (lines[29][i] == roadChar || lines[29][i] == coinChar) && ++centeredSpawnLocationCounter == roadCenter)
+                    ++visibleSpotCounter;
+                    if (findingSuitableSpawnpoint)
                     {
-                        playerPosition = ;
-                        spawning = false;
+                        if (lines[29][i] == roadChar || lines[29][i] == coinChar)
+                        {
+                            if (++roadCenter == halfRoadWidth)
+                            {
+                                findingSuitableSpawnpoint = false;
+                                playerPosition = visibleSpotCounter;
+                            }
+                        }
                     }
-                    if (++visibleSpotCounter == playerPosition)
+                    if (visibleSpotCounter == playerPosition)
                     {
-                        if (lines[29][i] != roadChar || lines[29][i] != coinChar)
-                        {
-                            //GlobalEvent.playerDies = true;
-                            //Interlocked.Exchange(ref Game.running, false);
-                            //return;
-                        }
-                        else if (lines[29][i] == coinChar)
-                        {
-                            //+ 1 collected coins
-                        }
                         lines[29][i] = playerChar;
+                        lines[29].Insert(i, $"{COLOR_MAGENTA}");
                     }
                     break;
             }
@@ -122,11 +120,11 @@ public class PlayField()
         
         roadSideColorDecider = !roadSideColorDecider; //switch behaviour Red & White roadside every time
 
-        lineReference.Append($"{COLOR_GREEN}").Append(grassChar, roadStartingPoint);                    //grass left
-        lineReference.Append(GetRoadsideColored());                                                     //roadside left
-        lineReference.Append(roadChar, roadWidth);                                                      //road
-        lineReference.Append(GetRoadsideColored());                                                     //roadside right
-        lineReference.Append($"{COLOR_GREEN}").Append(grassChar, Game.windowWidth - roadStartingPoint + 14); //grass right
+        lineReference.Append($"{COLOR_GREEN}").Append(grassChar, roadStartingPoint);                         //grass left
+        lineReference.Append(GetRoadsideColored());                                                          //roadside left
+        lineReference.Append(roadChar, roadWidth);                                                           //road
+        lineReference.Append(GetRoadsideColored());                                                          //roadside right
+        lineReference.Append($"{COLOR_GREEN}").Append(grassChar, Game.windowWidth - roadStartingPoint - roadWidth - 2); //grass right
         lineReference.Append($"{COLOR_RESET + lineNumber++}"); //makes debug info at the end normal text color and add a lineNumber to identify it
     }
 }
